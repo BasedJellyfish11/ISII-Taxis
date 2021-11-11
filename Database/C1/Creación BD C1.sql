@@ -124,10 +124,34 @@ CREATE TABLE paradas(
 	UNIQUE(coord_x, coord_y)
 	)
 
+INSERT INTO 
+	paradas(
+		nombre_parada, 
+		coord_x, 
+		coord_y
+		)
+VALUES
+	('Pinar de Chamartín', 40.48019347743851, -3.6668060471727975),
+	('Tetuán', 40.46097936473663, -3.6981538089337227),
+	('Sol', 40.41698359785564, -3.7035349844291487),
+	('Campus de Montegancedo', 40.405923243300826, -3.835644388483391)
+	
+
 CREATE TABLE estados_taxi(
 	id_estado TINYINT PRIMARY KEY,
 	desc_estado VARCHAR(20) NOT NULL
 	)
+
+INSERT INTO 
+	estados_taxi(
+		id_estado, 
+		desc_estado
+		)
+VALUES
+	(1, 'Disponible'),
+	(2, 'Ocupado'),
+	(3, 'Desconocido')
+	
 
 CREATE TABLE taxis(
 	matricula_taxi VARCHAR(10) PRIMARY KEY,
@@ -214,8 +238,8 @@ GO
 
 CREATE PROCEDURE registro_taxi
 	@matricula_taxi VARCHAR(10),
-	@id_parada INT,
-	@id_estado INT,
+	@id_parada TINYINT,
+	@id_estado TINYINT,
 	@email VARCHAR(100),
 	@n_plazas TINYINT,
 	@hora_disponible DATETIME
