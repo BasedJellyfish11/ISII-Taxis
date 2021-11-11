@@ -1,0 +1,81 @@
+@page "/adduser"
+@using ISII_Taxis.Form_models
+@using ISII_Taxis.Data.Database
+@using System.Security.Cryptography
+@using System.Text
+@inject NavigationManager navigationManager
+
+<h1>Alta de usuario</h1>
+
+<EditForm Model="@_altaUsuarioFormModel" OnValidSubmit="@HandleValidSubmit" >
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <label class="validation-message" hidden="@(!errorUsuarioYaExiste)">El usuario introducido ya existe</label>
+    <p>
+        <label>Nombre de usuario:</label>
+        <br/>
+        <InputText id="name" @bind-Value="_altaUsuarioFormModel.Username"/>
+    </p>
+    
+    <p>
+        <label>Contraseña:</label>
+        <br/>
+        <InputText id="password" type="password" @bind-Value="_altaUsuarioFormModel.Password"/>
+    </p>
+        
+    <p>
+        <label>Repetir contraseña:</label>
+        <br/>
+        <InputText id="password_repeat" type="password" @bind-Value="_altaUsuarioFormModel.PasswordRepeat"/>
+    </p>
+    
+    
+    
+    <p>
+        <label>E-Mail</label>
+        <br/>
+        <InputText id="correo" type="email" @bind-Value="_altaUsuarioFormModel.Email"/>
+    </p>
+    
+    <p>
+        <label>Dirección</label>
+        <br/>
+        <InputText id="address" @bind-Value="_altaUsuarioFormModel.Direccion"/>
+    </p>
+    
+    <p>
+        <label>Teléfono</label>
+        <br/>
+        <InputText id="telefono" @bind-Value="_altaUsuarioFormModel.Teléfono"/>
+    </p>
+
+    <button type="submit" class="btn-primary">Dar de alta</button>
+</EditForm>
+
+@code {
+    private readonly AltaUsuarioForm _altaUsuarioFormModel = new();
+    private bool errorUsuarioYaExiste = false;
+
+    private async Task HandleValidSubmit()
+    {
+        errorUsuarioYaExiste = false;  
+        
+        if (await SQLInteracter.RegistroUsuario(_altaUsuarioFormModel.Username!, HashPassword(_altaUsuarioFormModel.Password!), _altaUsuarioFormModel.Direccion!, _altaUsuarioFormModel.Email!, _altaUsuarioFormModel.Teléfono!))
+            navigationManager.NavigateTo("adduser/addsuccess");
+        
+        else
+        {
+            _altaUsuarioFormModel.Username = string.Empty;
+            errorUsuarioYaExiste = true;
+        }
+    }
+
+    private static string HashPassword(string password)
+    {
+        using SHA256 sha256 = SHA256.Create();
+        byte[] contraseña = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return BitConverter.ToString(contraseña).Replace("-","");
+    }
+
+}

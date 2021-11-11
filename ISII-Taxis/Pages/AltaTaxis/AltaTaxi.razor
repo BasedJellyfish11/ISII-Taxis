@@ -1,0 +1,80 @@
+@page "/addTaxi"
+@using ISII_Taxis.Form_models
+@using System.Text
+@using ISII_Taxis.Data.Database
+@inject NavigationManager navigationManager
+
+<h1>Alta de Taxi</h1>
+
+<EditForm Model="@_altaTaxiFormModel" OnValidSubmit="@HandleValidSubmit" >
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <label class="validation-message" hidden="@(!errorTaxiYaExiste)">El taxi introducido ya existe</label>
+    <p>
+        <label>Matrícula:</label>
+        <br/>
+        <InputText id="matricula" @bind-Value="_altaTaxiFormModel.Matricula"/>
+    </p>
+    
+    <p>
+        <label>Numero de plazas:</label>
+        <br/>
+        <InputNumber id="plazas" @bind-Value="_altaTaxiFormModel.NumeroPlazas"/>
+    </p>
+
+    <p>
+        <label>E-Mail</label>
+        <br/>
+        <InputText id="correo" type="email" @bind-Value="_altaTaxiFormModel.Email"/>
+    </p>
+    
+    <p>
+        <label>Parada inicial</label>
+        <br/>
+        <InputSelect id="parada" @bind-Value="_altaTaxiFormModel.NumeroParada">
+            <option value="">Seleccione</option> 
+            <option value="1">Pinar de Chamartín</option> 
+            <option value="2">Tetuán</option> 
+            <option value="3">Sol</option> 
+            <option value="4">Campus de Montegancedo</option> 
+        </InputSelect>
+    </p>
+    
+    <p>
+        <label>Estado</label>
+        <br/>
+        <InputSelect id="estado" @bind-Value="_altaTaxiFormModel.NumeroEstado">
+            <option value="">Seleccione</option> 
+            <option value="1">Disponible</option> 
+            <option value="2">Ocupado</option> 
+            <option value="3">Desconocido</option> 
+        </InputSelect>
+    </p>
+    <p>
+        <label>Fecha disponibilidad</label>
+        <br/>
+        <InputDate id="fechaDisponible" @bind-Value="_altaTaxiFormModel.HoraDisponible"/>
+    </p>
+
+    <button type="submit" class="btn-primary">Dar de alta</button>
+</EditForm>
+
+@code {
+    private readonly AltaTaxiForm _altaTaxiFormModel = new();
+    private bool errorTaxiYaExiste = false;
+
+    private async Task HandleValidSubmit()
+    {
+        errorTaxiYaExiste = false;
+        if (await SQLInteracter.RegistroTaxi(_altaTaxiFormModel.Matricula!, _altaTaxiFormModel.NumeroParada, _altaTaxiFormModel.NumeroEstado!, _altaTaxiFormModel.Email!, _altaTaxiFormModel.NumeroPlazas!, _altaTaxiFormModel.HoraDisponible))
+            navigationManager.NavigateTo("addtaxi/addsuccess");
+        
+        else
+        {
+            _altaTaxiFormModel.Matricula = string.Empty;
+            errorTaxiYaExiste = true;
+        }
+    }
+
+}
