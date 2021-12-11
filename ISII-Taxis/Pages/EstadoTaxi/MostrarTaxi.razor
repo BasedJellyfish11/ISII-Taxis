@@ -1,0 +1,50 @@
+@page "/mostrartaxi/{matricula}"
+@using ISII_Taxis.Data.Objects
+@using ISII_Taxis.Data.Database
+    
+<h1>Datos del taxi @matricula</h1>
+
+@if (taxi == null)
+{
+    <p>
+        <em>Cargando...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+            <thead>
+            <tr>
+                <th>Matrícula</th>
+                <th>Parada</th>
+                <th>Estado</th>
+                <th>Email</th>
+                <th>Hora Disponible</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                <tr>
+                    <td>@taxi.Value.matricula</td>
+                    <td>@taxi.Value.parada</td>
+                    <td>@taxi.Value.estado</td>
+                    <td>@taxi.Value.email</td>
+                    <td>@taxi.Value.horaDisponible</td>
+                </tr>
+            </tbody>
+        </table>
+}
+@code{
+
+    private Taxi? taxi = null;
+    
+    [Parameter]
+    public string matricula { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        taxi = await SQLInteracter.ConsultaTaxi(matricula);
+    }
+
+}

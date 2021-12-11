@@ -1,0 +1,42 @@
+@page "/searchtaxi"
+@using ISII_Taxis.Form_models
+@using ISII_Taxis.Data.Database
+@using System.Security.Cryptography
+@using System.Text
+@inject NavigationManager navigationManager
+
+<h1>Consultar taxi</h1>
+
+<EditForm Model = "@_buscarTaxiFormModel" OnValidSubmit="@HandleValidSubmit" >
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <label class="validation-message" hidden="@(!errorTaxiNoExiste)">El taxi introducido no existe</label>
+    <p>
+        <label>Matrícula:</label>
+        <br/>
+        <InputText id="name" @bind-Value="_buscarTaxiFormModel.Matricula"/>
+    </p>
+    
+    <button type="submit" class="btn-primary">Consultar</button>
+</EditForm>
+
+@code {
+    private BuscarTaxiForm _buscarTaxiFormModel = new();
+    private bool errorTaxiNoExiste;
+
+    private async Task HandleValidSubmit()
+    {
+        errorTaxiNoExiste = false;  
+        
+        if (await SQLInteracter.ConsultaTaxi(_buscarTaxiFormModel.Matricula) != null)
+            navigationManager.NavigateTo($"mostrartaxi/{_buscarTaxiFormModel.Matricula}");
+        
+        else
+        {
+            _buscarTaxiFormModel.Matricula = string.Empty;
+            errorTaxiNoExiste = true;
+        }
+    }
+
+}

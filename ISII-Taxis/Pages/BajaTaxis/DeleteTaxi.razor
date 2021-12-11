@@ -1,0 +1,62 @@
+@page "/deletetaxi"
+@using ISII_Taxis.Form_models
+@using ISII_Taxis.Data.Database
+@using ISII_Taxis.Data.Objects
+@using System.Data.SqlClient
+@inject NavigationManager navigationManager
+
+<h1>Eliminar Taxi</h1>
+@if (matriculasTaxis == null)
+{
+    <p>
+        <em>Cargando...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@_deleteTaxiFormModel" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <label class="validation-message" hidden="@(!deletionError)">No se ha podido eliminar el taxi. Es posible que tenga solicitudes asociadas.</label>
+        <p>
+            <label>Matrícula:</label>
+            <br/>
+            <InputSelect id="matricula" @bind-Value="_deleteTaxiFormModel.Matricula">
+                <option value="">Seleccione</option>
+                @foreach (string matricula in matriculasTaxis)
+                {
+                    <option value="@matricula">@matricula</option>
+                }
+            </InputSelect>
+        </p>
+
+        <button type="submit" class="btn-primary">Eliminar</button>
+    </EditForm>
+}
+@code {
+    private readonly DeleteTaxiForm _deleteTaxiFormModel = new();
+    private HashSet<string>? matriculasTaxis;
+    private bool deletionError;
+    protected override async Task OnInitializedAsync()
+    {
+        matriculasTaxis = new HashSet<string>((await SQLInteracter.ConsultaTaxis()).Select(x=>x.matricula));
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        deletionError = false;
+        try
+        {
+            await SQLInteracter.EliminarTaxi(_deleteTaxiFormModel.Matricula!);
+            navigationManager.NavigateTo("deletetaxi/deletesuccess");
+        }
+        catch (SqlException)
+        {
+            deletionError = true;
+        }
+        
+ 
+    }
+
+}

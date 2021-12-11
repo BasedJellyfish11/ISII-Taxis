@@ -1,0 +1,130 @@
+@page "/createrequest"
+@using ISII_Taxis.Form_models
+@using ISII_Taxis.Data.Database
+@using System.Security.Cryptography
+@using System.Text
+@using ISII_Taxis.Data.Objects
+@inject NavigationManager navigationManager
+
+<h1>Creación de solicitud</h1>
+@if (paradas == null || matriculasTaxis == null)
+{
+    <p>
+        <em>Cargando...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@_createRequestFormModel" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <label class="validation-message" hidden="@(!errorLoginInvalido)">El usuario introducido no existe o no su contraseña es inválida</label>
+        <p>
+            <label>Nombre de usuario:</label>
+            <br/>
+            <InputText id="name" @bind-Value="_createRequestFormModel.Username"/>
+        </p>
+
+        <label class="validation-message" hidden="@(!errorLoginInvalido)">El usuario introducido no existe o no su contraseña es inválida</label>
+        <p>
+            <label>Contraseña:</label>
+            <br/>
+            <InputText id="password" type="password" @bind-Value="_createRequestFormModel.Password"/>
+        </p>
+
+        <label class="validation-message" hidden="@(!errorMatriculaInvalida)">El taxi introducido no existe</label>
+        <p>
+            <label>Matrícula taxi:</label>
+            <br/>
+            <InputText id="matricula" @bind-Value="_createRequestFormModel.Matricula"/>
+        </p>
+
+        <p>
+            <label>Parada inicial</label>
+            <br/>
+            <InputSelect id="paradaInicial" @bind-Value="_createRequestFormModel.NumeroParadaInicial">
+                <option value= "">Seleccione</option>
+                @foreach (Parada parada in paradas)
+                {
+                    <option value= "@parada.id_parada">@parada.nombre_parada</option>
+                }
+            </InputSelect>
+        </p>
+        
+        <p>
+            <label>Parada final</label>
+            <br/>
+            <InputSelect id="paradaFinal" @bind-Value="_createRequestFormModel.NumeroParadaFinal">
+                <option value= "">Seleccione</option>
+                @foreach (Parada parada in paradas)
+                {
+                    <option value= "@parada.id_parada">@parada.nombre_parada</option>
+                }
+            </InputSelect>
+        </p>
+        <p>
+            <label>Fecha</label>
+            <br/>
+            <InputDate id="fechaSolicitud" @bind-Value="_createRequestFormModel.FechaDisponible"/>
+        </p>        
+        <p>
+            <label>Hora</label>
+            <br/>
+            <InputText type="time" @bind-Value="ParsearHora" id="horaSolicitud"/>
+        </p>
+
+        <button type="submit" class="btn-primary">Dar de alta</button>
+    </EditForm>
+}
+@code {
+    private readonly CreateRequestForm _createRequestFormModel = new();
+    private bool errorLoginInvalido;
+    private bool errorMatriculaInvalida;
+    private List<Parada>? paradas;
+    private HashSet<string>? matriculasTaxis;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        paradas = await SQLInteracter.ConsultaParadas();
+        matriculasTaxis = new HashSet<string>((await SQLInteracter.ConsultaTaxis()).Select(x=>x.matricula));
+    }
+    
+    string ParsearHora { get => _createRequestFormModel.HoraDisponible.ToString(); set => TimeSpan.TryParse(value,out _createRequestFormModel.HoraDisponible); }
+    
+    private async Task HandleValidSubmit()
+    {
+        errorLoginInvalido = false;
+        errorMatriculaInvalida = false;
+        if (!await SQLInteracter.LoginUsuario(_createRequestFormModel.Username, HashPassword(_createRequestFormModel.Password)))
+        {
+            errorLoginInvalido = true;
+            _createRequestFormModel.Username = string.Empty;
+            _createRequestFormModel.Password = string.Empty;
+        }
+        
+        else if (!matriculasTaxis.Contains(_createRequestFormModel.Matricula))
+        {
+            errorMatriculaInvalida = true;
+            _createRequestFormModel.Matricula = string.Empty;
+        }
+        
+        if(errorLoginInvalido || errorMatriculaInvalida)
+            return;
+
+        await SQLInteracter.CrearSolicitud(_createRequestFormModel.Username, _createRequestFormModel.Matricula, _createRequestFormModel.NumeroParadaInicial, _createRequestFormModel.NumeroParadaFinal, _createRequestFormModel.FechaDisponible + _createRequestFormModel.HoraDisponible);
+        navigationManager.NavigateTo("createrequest/createsuccess");
+
+        
+        
+    }
+
+    private static string HashPassword(string password)
+    {
+        using SHA256 sha256 = SHA256.Create();
+        byte[] contraseña = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return BitConverter.ToString(contraseña).Replace("-","");
+    }
+
+}
