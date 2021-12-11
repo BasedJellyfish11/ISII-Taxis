@@ -127,4 +127,61 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE obtener_solicitudes
+@estado TINYINT
+AS
+BEGIN 
 
+	SELECT
+		id_solicitud,
+		nombre_usuario,
+		matricula_taxi,
+		paradas_origen.nombre_parada AS parada_origen,
+		paradas_destino.nombre_parada AS parada_destino,
+		desc_estado,
+		hora_fecha
+	FROM
+		solicitudes
+	LEFT JOIN
+		estados_solicitud
+	ON
+		solicitudes.id_estado = estados_solicitud.id_estado
+	LEFT JOIN
+		paradas paradas_origen
+	ON
+		solicitudes.id_parada_origen = paradas_origen.id_parada
+	LEFT JOIN
+		paradas paradas_destino
+	ON
+		solicitudes.id_parada_destino = paradas_destino.id_parada
+	WHERE
+		solicitudes.id_estado = COALESCE(@estado, solicitudes.id_estado)
+	
+END
+GO
+
+CREATE PROCEDURE validar_solicitud
+	@id INT
+AS
+BEGIN 
+
+	UPDATE solicitudes
+	SET
+		id_estado = 1
+	WHERE
+		id_solicitud = @id
+	
+END
+GO
+
+CREATE PROCEDURE rechazar_solicitud
+	@id INT
+AS
+BEGIN 
+
+	DELETE FROM solicitudes
+	WHERE
+		id_solicitud = @id
+	
+END
+GO

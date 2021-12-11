@@ -1,0 +1,65 @@
+@page "/requestvalidation"
+@using ISII_Taxis.Data.Objects
+@using ISII_Taxis.Data.Database
+    
+<h1>Validación de solicitudes</h1>
+
+@if (solicitudes == null)
+{
+    <p>
+        <em>Cargando...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Usuario</th>
+                <th>Matrícula</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Fecha y hora</th>
+                <th>Confirmar</th>
+                <th>Denegar</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Solicitud solicitud in solicitudes)
+            {
+                <tr>
+                    <td>@solicitud.Id</td>
+                    <td>@solicitud.Usuario</td>
+                    <td>@solicitud.Matricula</td>
+                    <td>@solicitud.ParadaOrigen</td>
+                    <td>@solicitud.ParadaDestino</td>
+                    <td>@solicitud.FechaHora</td>
+                    <td class = "compound"><button type = "submit" class  = "compound" @onclick="async () => {await ConfirmarSolicitud(solicitud.Id); solicitudes.Remove(solicitud);}">Confirmar asignación</button></td>
+                    <td class = "compound"><button type = "reset"  class  = "compound" @onclick="async () => {await RechazarSolicitud(solicitud.Id); solicitudes.Remove(solicitud);}">Rechazar asignación</button></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+}
+@code{
+
+    private List<Solicitud>? solicitudes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnParametersSetAsync();
+        solicitudes = await SQLInteracter.ConsultaSolicitudes(0);
+    }
+
+    private static async Task ConfirmarSolicitud(int id)
+    {
+        await SQLInteracter.ConfirmarSolicitud(id);
+    }
+
+    private static async Task RechazarSolicitud(int id)
+    {
+        await SQLInteracter.RechazarSolicitud(id);
+    }
+
+}

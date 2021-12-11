@@ -13,6 +13,9 @@
         public const string consulta_taxi = nameof(consulta_taxi);
         public const string consulta_taxis = nameof(consulta_taxis);
         public const string consulta_paradas = nameof(consulta_paradas);
+        public const string obtener_solicitudes = nameof(obtener_solicitudes);
+        public const string validar_solicitud = nameof(validar_solicitud);
+        public const string rechazar_solicitud = nameof(rechazar_solicitud);
     }
 
 
@@ -41,6 +44,16 @@
         public const string nombre_parada = nameof(nombre_parada);
         public const string coord_x = nameof(coord_x);
         public const string coord_y = nameof(coord_y);
+    }
+    public static class ObtenerSolicitudesColumns
+    {
+        public const string id_solicitud = nameof(id_solicitud);
+        public const string nombre_usuario = nameof(nombre_usuario);
+        public const string matricula_taxi = nameof(matricula_taxi);
+        public const string parada_origen = nameof(parada_origen);
+        public const string parada_destino = nameof(parada_destino);
+        public const string desc_estado = nameof(desc_estado);
+        public const string hora_fecha = nameof(hora_fecha);
     }
 
     #endregion
@@ -84,7 +97,19 @@
     {
         public const string matricula_taxi = nameof(matricula_taxi);
     }
-
+    public static class ObtenerSolicitudesParams
+    {
+        public const string estado = nameof(estado);
+    }
+    public static class ValidarSolicitudParams
+    {
+        public const string id = nameof(id);
+    }
+    public static class RechazarSolicitud
+    {
+        public const string id = nameof(id);
+    }
+    
     #endregion
     
 

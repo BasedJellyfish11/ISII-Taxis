@@ -1,0 +1,49 @@
+@page "/viewtaxis"
+@using ISII_Taxis.Data.Objects
+@using ISII_Taxis.Data.Database
+    
+<h1>Listado de taxis</h1>
+
+@if (taxis == null)
+{
+    <p>
+        <em>Cargando...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+            <thead>
+            <tr>
+                <th>Matrícula</th>
+                <th>Parada</th>
+                <th>Estado</th>
+                <th>Email</th>
+                <th>Hora Disponible</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Taxi taxi in taxis)
+            {
+                <tr>
+                    <td>@taxi.matricula</td>
+                    <td>@taxi.parada</td>
+                    <td>@taxi.estado</td>
+                    <td>@taxi.email</td>
+                    <td>@taxi.horaDisponible</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+}
+@code{
+
+    private List<Taxi>? taxis;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnParametersSetAsync();
+        taxis = await SQLInteracter.ConsultaTaxis();
+    }
+
+}

@@ -127,6 +127,35 @@ namespace ISII_Taxis.Data.Database
             return result;
             
         }
+        public static async Task<int> ConfirmarSolicitud(int id)
+        {
+            await using SqlConnection connection = new(CONNECTION_STRING);
+            SqlParameter[] parameters =
+            {
+                new($"@{ValidarSolicitudParams.id}", SqlDbType.Int),
+
+            };
+            parameters[0].Value = id;
+            
+            int result = await ExecuteReturnValueProcedure(ProcedureNames.validar_solicitud, parameters);
+            return result;
+            
+        }
+        public static async Task<int> RechazarSolicitud(int id)
+        {
+            await using SqlConnection connection = new(CONNECTION_STRING);
+            SqlParameter[] parameters =
+            {
+                new($"@{ValidarSolicitudParams.id}", SqlDbType.Int),
+
+            };
+            parameters[0].Value = id;
+            
+            int result = await ExecuteReturnValueProcedure(ProcedureNames.rechazar_solicitud, parameters);
+            return result;
+            
+        }
+
         public static async Task<bool> LoginUsuario(string usuario, string contrasena)
         {
             await using SqlConnection connection = new(CONNECTION_STRING);
@@ -166,13 +195,13 @@ namespace ISII_Taxis.Data.Database
                 horaDisponible = (DateTime)reader[TablaTaxiColumns.hora_disponible]
             };
         }
-        public static async Task<List<Taxi>> ConsultaTaxis()
+        public static async Task<List<Taxi>?> ConsultaTaxis()
         {
             await using SqlConnection connection = new(CONNECTION_STRING);
 
             await using SqlDataReader reader = await ExecuteReturnQueryProcedure(ProcedureNames.consulta_taxis, connection);
 
-            List<Taxi> result = new();
+            List<Taxi>? result = new();
 
             while (reader.Read())
             {
@@ -206,6 +235,34 @@ namespace ISII_Taxis.Data.Database
             }
 
             return paradas;
+        }
+        public static async Task<List<Solicitud>> ConsultaSolicitudes(int? id_estado = null)
+        {
+            await using SqlConnection connection = new(CONNECTION_STRING);
+            SqlParameter[] parameters =
+            {
+                new($"@{ObtenerSolicitudesParams.estado}", SqlDbType.TinyInt),
+            };
+            parameters[0].Value = id_estado;
+            await using SqlDataReader reader = await ExecuteReturnQueryProcedure(ProcedureNames.obtener_solicitudes, connection, parameters);
+            
+            List<Solicitud> solicitudes = new();
+
+            while (reader.Read())
+            {
+                solicitudes.Add(new Solicitud()
+                {
+                    Id = (int)reader[ObtenerSolicitudesColumns.id_solicitud],
+                    Usuario = (string)reader[ObtenerSolicitudesColumns.nombre_usuario],
+                    Matricula = (string)reader[ObtenerSolicitudesColumns.matricula_taxi],
+                    Estado = (string)reader[ObtenerSolicitudesColumns.desc_estado],
+                    ParadaOrigen = (string)reader[ObtenerSolicitudesColumns.parada_origen],
+                    ParadaDestino = (string)reader[ObtenerSolicitudesColumns.parada_destino],
+                    FechaHora = (DateTime)reader[ObtenerSolicitudesColumns.hora_fecha],
+                });
+            }
+
+            return solicitudes;
         }
 
         #region helper functions
